@@ -1,13 +1,17 @@
 <script setup>
-const emit = defineEmits(["changePencil"]);
+const props = defineProps({
+  pencil: { type: Object, required: true },
+});
+const emit = defineEmits(["change-pencil-mode", "change-pencil-radius"]);
 
-const pencil = ref({ mode: "", radius: 15 });
 const handleChangePencilMode = (mode) => {
-  pencil.value.mode = mode;
-  emit("changePencil", pencil.value);
+  emit("change-pencil-mode", mode);
 };
+
+const pencilRadius = ref(props.pencil.radius);
 const handleChangePencilRadius = () => {
-  emit("changePencil", pencil.value);
+  console.log("change", pencilRadius.value);
+  emit("change-pencil-radius", pencilRadius.value);
 };
 </script>
 
@@ -33,9 +37,9 @@ const handleChangePencilRadius = () => {
     <div class="flex items-center mt-12px">
       <div>笔刷大小</div>
       <input
-        v-model.number="pencil.radius"
+        v-model.number="pencilRadius"
         class="pencil-radius-input"
-        @change="handleChangePencilRadius"
+        @update:modelValue="handleChangePencilRadius"
       />
     </div>
   </div>

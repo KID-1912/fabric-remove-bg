@@ -1,6 +1,7 @@
 import { DragGesture } from "@use-gesture/vanilla";
 
 export const useDraggable = (el, options) => {
+  const { onDrag, ...gestureOptions } = options;
   // 初始化
   let dragGesture;
   const position = reactive({ x: 0, y: 0 });
@@ -12,13 +13,16 @@ export const useDraggable = (el, options) => {
         const [dx, dy] = delta;
         position.x += dx;
         position.y += dy;
+        onDrag?.(position);
       },
-      options,
+      gestureOptions,
     );
   });
   // 开启/禁用拖拽
+  const draggable = ref(gestureOptions?.enabled === false ? false : true);
   const setDraggable = (enabled) => {
-    dragGesture.setConfig({ drag: { enabled } });
+    draggable.value = enabled;
+    dragGesture.setConfig({ enabled });
   };
   // 设置位置坐标
   const setPosition = ({ x, y }) => {
@@ -28,6 +32,7 @@ export const useDraggable = (el, options) => {
   return {
     ...toRefs(position),
     position,
+    draggable,
     setDraggable,
     setPosition,
   };

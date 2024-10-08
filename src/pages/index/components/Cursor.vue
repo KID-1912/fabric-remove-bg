@@ -1,16 +1,15 @@
 <script setup>
-const visible = inject("cursorVisible");
-const position = inject("cursorXY");
+const cursor = inject("cursor");
 </script>
 
 <template>
   <div
-    v-show="visible"
+    v-show="cursor.visible"
     :style="{
-      width: 10 + 'px',
-      height: 10 + 'px',
-      left: `${position.x}px`,
-      top: `${position.y}px`,
+      width: `${cursor.radius}px`,
+      height: `${cursor.radius}px`,
+      left: `${cursor.position.x}px`,
+      top: `${cursor.position.y}px`,
     }"
     class="panel-cursor"
   ></div>
