@@ -1,6 +1,8 @@
 <script setup>
+import { fabric } from "fabric";
 import { getImageSize } from "@/utils/index.js";
 import Sidebar from "./components/Sidebar/Sidebar.vue";
+import Header from "./components/Header/Header.vue";
 import ControlBar from "./components/ControlBar/ControlBar.vue";
 import BasePanel from "./components/BasePanel/BasePanel.vue";
 import ImagePanel from "./components/ImagePanel/ImagePanel.vue";
@@ -47,6 +49,7 @@ const fabricPanel = ref(null); // fabric画布面板
 let fabricContext; // fabric画布
 const onFabricCanvasInitialized = (context) => {
   fabricContext = context;
+  fabricContext.on("history:change", onHistoryChange.bind(context));
 };
 
 // cursor
@@ -113,6 +116,7 @@ const onDragFabricBasePanel = ({ x, y }) => {
 
 // 画板滚轮缩放与联动
 const scaleRatio = ref(1);
+provide("scaleRatio", scaleRatio);
 const onWheelFormImageBasePanel = (dy) => {
   const { width, height } = formImageBasePanel.value.getWidthHeight();
   scaleRatio.value = Math.floor((width / fromImageSize.value.width) * 100) / 100;
@@ -125,49 +129,107 @@ const onWheelFabricBasePanel = (dy) => {
   fabricPanel.value.setWidthHeight({ width, height });
   formImageBasePanel.value.triggerWheel(dy);
 };
+
+// 设置背景
+const onChangeBackground = ({ type, color, url }) => {
+  if (type === "color") {
+    fabricContext.setBackgroundImage(null);
+    fabricContext.setBackgroundColor(color, fabricContext.renderAll.bind(fabricContext));
+    fabricContext.record();
+  }
+  if (type === "image") {
+    fabric.Image.fromURL(
+      url,
+      function (img) {
+        let scaleX = fabricContext.width / img.width;
+        let scaleY = fabricContext.height / img.height;
+        const scale = Number(Math.max(scaleX, scaleY).toFixed(4));
+        img.set({
+          scaleX: scale,
+          scaleY: scale,
+          left: fabricContext.width >> 1,
+          top: fabricContext.height >> 1,
+          originX: "center",
+          originY: "center",
+        });
+        img.set("erasable", false);
+        fabricContext.setBackgroundColor("");
+        fabricContext.setBackgroundImage(img);
+        fabricContext.renderAll();
+        fabricContext.record();
+      },
+      { crossOrigin: "Anonymous" },
+    );
+  }
+};
+
+// 历史记录操作
+const canPrev = ref(false);
+const canNext = ref(false);
+const onHistoryChange = function () {
+  const { _historyIndex: historyIndex, _stack: stack } = this;
+  canPrev.value = historyIndex > 0;
+  canNext.value = historyIndex < stack.length - 1;
+};
+const handleOptSteps = (type, can) => {
+  if (can === false) return;
+  if (type === -1) {
+    fabricContext.undo();
+  } else if (type === 1) {
+    fabricContext.redo();
+  } else {
+    fabricContext.reset();
+  }
+};
 </script>
 
 <template>
-  <div class="absolute">{{ scaleRatio }}</div>
   <div class="flex h-full">
     <Sidebar
       :pencil="pencil"
       @change-pencil-mode="onChangePencilMode"
       @change-pencil-radius="onChangePencilRadius"
+      @change-background="onChangeBackground"
     />
-    <div class="wrapper">
-      <div class="panel-container">
-        <BasePanel
-          ref="formImageBasePanel"
-          class="panel"
-          @on-drag="onDragFromImageBasePanel"
-          @on-wheel="onWheelFormImageBasePanel"
-        >
-          <ImagePanel :from-image-u-r-l="fromImageURL"></ImagePanel>
-        </BasePanel>
-      </div>
-      <div class="panel-container left-border">
-        <BasePanel
-          ref="fabricBasePanel"
-          class="panel fabric-panel"
-          @mousemove="onMousemove"
-          @mouseenter="onMouseenter"
-          @mouseleave="onMouseleave"
-          @on-drag="onDragFabricBasePanel"
-          @on-wheel="onWheelFabricBasePanel"
-        >
-          <FabricPanel ref="fabricPanel" @initialized="onFabricCanvasInitialized"></FabricPanel>
-        </BasePanel>
+    <div class="flex flex-col flex-1">
+      <Header :can-prev="canPrev" :can-next="canNext" @change-history-step="handleOptSteps" />
+      <div class="wrapper">
+        <div class="panel-container">
+          <BasePanel
+            ref="formImageBasePanel"
+            class="panel"
+            @on-drag="onDragFromImageBasePanel"
+            @on-wheel="onWheelFormImageBasePanel"
+          >
+            <ImagePanel :from-image-u-r-l="fromImageURL"></ImagePanel>
+          </BasePanel>
+        </div>
+        <div class="panel-container left-border">
+          <BasePanel
+            ref="fabricBasePanel"
+            class="panel fabric-panel"
+            @mousemove="onMousemove"
+            @mouseenter="onMouseenter"
+            @mouseleave="onMouseleave"
+            @on-drag="onDragFabricBasePanel"
+            @on-wheel="onWheelFabricBasePanel"
+          >
+            <FabricPanel ref="fabricPanel" @initialized="onFabricCanvasInitialized"></FabricPanel>
+          </BasePanel>
+        </div>
       </div>
     </div>
-    <ControlBar class="control-bar" @change-draggable="onChangeDraggable" />
+    <ControlBar
+      class="control-bar"
+      :scale-ratio="scaleRatio"
+      @change-draggable="onChangeDraggable"
+    />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .wrapper {
   display: flex;
-  flex: 1;
   height: 100%;
   background-color: #f5f7fd;
 }

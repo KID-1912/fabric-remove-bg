@@ -1,5 +1,6 @@
 <script setup>
 const cursor = inject("cursor");
+const scaleRatio = inject("scaleRatio");
 </script>
 
 <template>

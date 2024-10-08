@@ -34,10 +34,6 @@ vue-drag-resize 实现自定义/按比例裁剪
     setDrawingBrush，修补实现：添加一个默认被擦除的底图至于抠图下层
   - 拖拽和绘制模式切换,画布位置联动
 
-缩放
-历史记录
-设置颜色与背景
-
 ### clipdrop API
 
 https://clipdrop.co/apis/docs/remove-background

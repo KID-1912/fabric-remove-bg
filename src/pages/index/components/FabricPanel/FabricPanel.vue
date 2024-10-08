@@ -44,6 +44,7 @@ const initFabric = async (options) => {
       img.scaleToHeight(fabricInstance.height);
       img.set("selectable", false);
       fabricInstance.add(img);
+      fabricInstance.record();
       emit("initialized", fabricInstance);
     },
     { crossOrigin: "Anonymous" },

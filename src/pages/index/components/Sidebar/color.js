@@ -1,0 +1,17 @@
+export const COLOR_LIST = [
+  "transparent",
+  "#FF0000",
+  "#00BEF3",
+  "#438EEA",
+  "#FFFFFF",
+  "#FF5B5B",
+  "#FFBD4A",
+  "#FEF851",
+  "#99E265",
+  "#36B72A",
+  "#44D8E6",
+  "#2EB2FF",
+  "#5272FF",
+  "#B760E6",
+  "#FF63B1",
+];
