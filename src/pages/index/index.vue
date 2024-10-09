@@ -7,15 +7,16 @@ import BasePanel from "./components/BasePanel/BasePanel.vue";
 import ImagePanel from "./components/ImagePanel/ImagePanel.vue";
 import FabricPanel from "./components/FabricPanel/FabricPanel.vue";
 import { calcAdaptScale, calcCenterPosition } from "./helper/calculate.js";
-const formImage = new URL("@/assets/images/person.jpg", import.meta.url).href;
-const resultImage = new URL("@/assets/images/person.png", import.meta.url).href;
+import { useRemoveBg } from "@/composables/useRemoveBg.js";
+const exampleFormImage = new URL("@/assets/images/person.jpg", import.meta.url).href;
+// const resultImage = new URL("@/assets/images/person.png", import.meta.url).href;
 
 // 原图片
-const fromImageURL = ref("");
+const { loading, fromImageURL, resultImageURL } = useRemoveBg(exampleFormImage); // 去除图片背景
 const fromImageSize = ref({ width: 0, height: 0 });
 onMounted(async () => {
   // 图片原尺寸
-  const imageSize = await getImageSize(formImage);
+  const imageSize = await getImageSize(fromImageURL);
   fromImageSize.value = { width: imageSize.width, height: imageSize.height };
   const panelContainerDOM = document.querySelector(".panel-container.left-border");
   const panelContainerSize = {
@@ -35,8 +36,12 @@ onMounted(async () => {
   formImageBasePanel.value.setXY({ x, y });
   fabricBasePanel.value.setXY({ x, y });
   // 初始化面板
-  fromImageURL.value = formImage;
-  fabricPanel.value.initFabric({ width, height, fromImage: formImage, removeBgImage: resultImage });
+  fabricPanel.value.initFabric({
+    width,
+    height,
+    fromImage: fromImageURL.value,
+    removeBgImage: resultImageURL,
+  });
 });
 
 // 左侧图片
@@ -166,6 +171,7 @@ const handleOptSteps = (type, can) => {
       <div class="wrapper">
         <div class="panel-container">
           <BasePanel
+            v-if="loading === false"
             ref="formImageBasePanel"
             class="panel"
             @on-drag="onDragFromImageBasePanel"
@@ -176,6 +182,7 @@ const handleOptSteps = (type, can) => {
         </div>
         <div class="panel-container left-border">
           <BasePanel
+            v-if="loading === false"
             ref="fabricBasePanel"
             class="panel fabric-panel"
             @mousemove="onMousemove"
