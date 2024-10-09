@@ -24,15 +24,22 @@ vue-drag-resize 实现自定义/按比例裁剪
 - BasePanel 实现基础面板能力
 
   - 拖拽√，编写useDraggable.js，使用use-gesture实现
-  - 缩放
+  - 缩放√，编写useWheel.js滚动时调整面板大小位置，使用use-gesture实现，同步调整画布大小
 
 - FabricPanel 实现画布面板的能力
+
   - 独立FabricPanel组件，包含初始化 fabric 画布，并绘制底图(initFabricCanvas),自适应宽高和居中位置实现
   - 编写useFabric.js增强fabric能力，可绘画画笔(fabric-eraser-brush + isDrawingMode)
   - 笔触（cursor）支持,Cursor.vue + provide/inject
   - 画笔实现：擦除,画笔大小:实现FabricPanel的setIsDrawingMode
     setDrawingBrush，修补实现：添加一个默认被擦除的底图至于抠图下层
   - 拖拽和绘制模式切换,画布位置联动
+  - 设置背景, setBackgroundColor setBackgroundImage
+  - 历史记录, fabricjs-history createHistory
+
+- 接口对接，loading实现，自定义上传图片
+
+- 裁剪思路说明
 
 ### clipdrop API
 

@@ -1,5 +1,4 @@
 <script setup>
-import { fabric } from "fabric";
 import { getImageSize } from "@/utils/index.js";
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import Header from "./components/Header/Header.vue";
@@ -25,7 +24,7 @@ onMounted(async () => {
   };
   // 自适应容器宽高
   const adaptScale = calcAdaptScale(imageSize, panelContainerSize);
-  const percentage = 0.8; // 不占满容器；
+  const percentage = 0.98; // 不占满容器；
   scaleRatio.value = Math.floor(adaptScale * percentage * 100) / 100;
   const width = imageSize.width * scaleRatio.value;
   const height = imageSize.height * scaleRatio.value;
@@ -56,7 +55,7 @@ const onFabricCanvasInitialized = (context) => {
 const cursor = ref({
   visible: false,
   position: { x: 0, y: 0 },
-  radius: 15,
+  radius: 10,
 });
 provide("cursor", cursor);
 // 移入显示cursor
@@ -76,25 +75,22 @@ const onMousemove = (event) => {
 };
 
 // 切换擦除/修补画笔
-const pencil = ref({ mode: "none", radius: 15 });
+const pencil = ref({ mode: "none", radius: 10 });
 const onChangePencilMode = (mode) => {
   pencil.value.mode = mode;
   fabricPanel.value.setIsDrawingMode(true);
   fabricPanel.value.setDrawingBrush({
     inverted: pencil.value.mode === "patch",
-    width: pencil.value.radius,
+    width: pencil.value.radius / scaleRatio.value,
   });
+  cursor.value.radius = pencil.value.radius / scaleRatio.value;
   fabricBasePanel.value.setDraggable(false);
   formImageBasePanel.value.setDraggable(false);
 };
 // 修改画笔半径粗细
 const onChangePencilRadius = (radius) => {
-  cursor.value.radius = radius;
   pencil.value.radius = radius;
-  fabricPanel.value.setDrawingBrush({
-    inverted: pencil.value.mode === "patch",
-    width: pencil.value.radius,
-  });
+  fabricPanel.value.setDrawingBrushWidth(radius / scaleRatio.value);
 };
 
 // 开启/关闭拖拽
@@ -116,51 +112,25 @@ const onDragFabricBasePanel = ({ x, y }) => {
 
 // 画板滚轮缩放与联动
 const scaleRatio = ref(1);
-provide("scaleRatio", scaleRatio);
 const onWheelFormImageBasePanel = (dy) => {
   const { width, height } = formImageBasePanel.value.getWidthHeight();
   scaleRatio.value = Math.floor((width / fromImageSize.value.width) * 100) / 100;
   fabricPanel.value.setWidthHeight({ width, height });
+  fabricPanel.value.setDrawingBrushWidth(pencil.value.radius / scaleRatio.value);
   fabricBasePanel.value.triggerWheel(dy);
 };
 const onWheelFabricBasePanel = (dy) => {
   const { width, height } = fabricBasePanel.value.getWidthHeight();
   scaleRatio.value = Math.floor((width / fromImageSize.value.width) * 100) / 100;
   fabricPanel.value.setWidthHeight({ width, height });
+  fabricPanel.value.setDrawingBrushWidth(pencil.value.radius / scaleRatio.value);
   formImageBasePanel.value.triggerWheel(dy);
 };
 
 // 设置背景
 const onChangeBackground = ({ type, color, url }) => {
-  if (type === "color") {
-    fabricContext.setBackgroundImage(null);
-    fabricContext.setBackgroundColor(color, fabricContext.renderAll.bind(fabricContext));
-    fabricContext.record();
-  }
-  if (type === "image") {
-    fabric.Image.fromURL(
-      url,
-      function (img) {
-        let scaleX = fabricContext.width / img.width;
-        let scaleY = fabricContext.height / img.height;
-        const scale = Number(Math.max(scaleX, scaleY).toFixed(4));
-        img.set({
-          scaleX: scale,
-          scaleY: scale,
-          left: fabricContext.width >> 1,
-          top: fabricContext.height >> 1,
-          originX: "center",
-          originY: "center",
-        });
-        img.set("erasable", false);
-        fabricContext.setBackgroundColor("");
-        fabricContext.setBackgroundImage(img);
-        fabricContext.renderAll();
-        fabricContext.record();
-      },
-      { crossOrigin: "Anonymous" },
-    );
-  }
+  if (type === "color") fabricPanel.value.setBackgroundColor(color);
+  if (type === "image") fabricPanel.value.setBackgroundImage(url);
 };
 
 // 历史记录操作

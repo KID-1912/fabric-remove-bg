@@ -58,7 +58,7 @@ const changeBackgroundImage = (url) => {
       <input
         v-model.number="pencilRadius"
         class="pencil-radius-input"
-        @update:modelValue="handleChangePencilRadius"
+        @input="handleChangePencilRadius"
       />
     </div>
     <div class="title mt-20px">背景</div>

@@ -2,6 +2,7 @@
 import { fabric } from "fabric";
 import { useFabric } from "../../composables/useFabric.js";
 import Cursor from "../Cursor.vue";
+import { createHistory } from "fabricjs-history";
 
 const emit = defineEmits(["initialized"]);
 
@@ -44,7 +45,7 @@ const initFabric = async (options) => {
       img.scaleToHeight(fabricInstance.height);
       img.set("selectable", false);
       fabricInstance.add(img);
-      fabricInstance.record();
+      createHistory({ canvas: fabricInstance, historyEvent: ["erasing:end"] });
       emit("initialized", fabricInstance);
     },
     { crossOrigin: "Anonymous" },
@@ -62,6 +63,9 @@ const setDrawingBrush = ({ inverted, width }) => {
   eraserBrush.width = width;
   fabricInstance.freeDrawingBrush = eraserBrush;
 };
+const setDrawingBrushWidth = (width) => {
+  fabricInstance.freeDrawingBrush.width = width;
+};
 
 // 设置画布大小
 const setWidthHeight = ({ width, height }) => {
@@ -71,12 +75,48 @@ const setWidthHeight = ({ width, height }) => {
   fabricInstance.setZoom(zoom);
 };
 
+// 设置画布背景色
+const setBackgroundColor = (color) => {
+  fabricInstance.setBackgroundImage(null);
+  fabricInstance.setBackgroundColor(color, fabricInstance.renderAll.bind(fabricInstance));
+  fabricInstance.record();
+};
+
+// 设置画布背景图
+const setBackgroundImage = (url) => {
+  fabric.Image.fromURL(
+    url,
+    function (img) {
+      let scaleX = fabricInstance.width / img.width;
+      let scaleY = fabricInstance.height / img.height;
+      const scale = Math.ceil(Math.max(scaleX, scaleY) * 100) / 100;
+      img.set({
+        scaleX: scale,
+        scaleY: scale,
+        left: fabricInstance.width >> 1,
+        top: fabricInstance.height >> 1,
+        originX: "center",
+        originY: "center",
+      });
+      img.set("erasable", false);
+      fabricInstance.setBackgroundColor("");
+      fabricInstance.setBackgroundImage(img);
+      fabricInstance.renderAll();
+      fabricInstance.record();
+    },
+    { crossOrigin: "Anonymous" },
+  );
+};
+
 defineExpose({
   initFabric,
   getIsDrawingMode,
   setIsDrawingMode,
   setDrawingBrush,
+  setDrawingBrushWidth,
   setWidthHeight,
+  setBackgroundColor,
+  setBackgroundImage,
 });
 </script>
 
