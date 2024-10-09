@@ -1,22 +1,23 @@
 <script setup>
-import { getImageSize } from "@/utils/index.js";
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import Header from "./components/Header/Header.vue";
 import ControlBar from "./components/ControlBar/ControlBar.vue";
 import BasePanel from "./components/BasePanel/BasePanel.vue";
 import ImagePanel from "./components/ImagePanel/ImagePanel.vue";
 import FabricPanel from "./components/FabricPanel/FabricPanel.vue";
+import { getImageSize } from "@/utils/index.js";
 import { calcAdaptScale, calcCenterPosition } from "./helper/calculate.js";
-import { useRemoveBg } from "@/composables/useRemoveBg.js";
-const exampleFormImage = new URL("@/assets/images/person.jpg", import.meta.url).href;
-// const resultImage = new URL("@/assets/images/person.png", import.meta.url).href;
+import { useRemoveBg } from "./composables/useRemoveBg.js";
 
-// 原图片
-const { loading, fromImageURL, resultImageURL } = useRemoveBg(exampleFormImage); // 去除图片背景
+// 去除图片背景
+const { finished, fromImageURL, resultImageURL, fetchRemoveBg } = useRemoveBg();
+
+// 初始化基础面板
 const fromImageSize = ref({ width: 0, height: 0 });
-onMounted(async () => {
+const basePanelReady = computed(() => fromImageSize.value.width && fromImageSize.value.height);
+const initBasePanel = async () => {
   // 图片原尺寸
-  const imageSize = await getImageSize(fromImageURL);
+  const imageSize = await getImageSize(fromImageURL.value);
   fromImageSize.value = { width: imageSize.width, height: imageSize.height };
   const panelContainerDOM = document.querySelector(".panel-container.left-border");
   const panelContainerSize = {
@@ -35,14 +36,15 @@ onMounted(async () => {
   const { x, y } = calcCenterPosition({ width, height }, panelContainerSize);
   formImageBasePanel.value.setXY({ x, y });
   fabricBasePanel.value.setXY({ x, y });
-  // 初始化面板
-  fabricPanel.value.initFabric({
-    width,
-    height,
-    fromImage: fromImageURL.value,
-    removeBgImage: resultImageURL,
-  });
-});
+};
+onMounted(initBasePanel);
+const handleChangeFromImageURL = (imageURL) => {
+  fetchRemoveBg(imageURL);
+  initBasePanel();
+};
+// watch(fromImageURL, async () => {
+//   if (!fromImageURL.value) return;
+// });
 
 // 左侧图片
 const formImageBasePanel = ref(null); // fromImage图片面板
@@ -65,7 +67,7 @@ const cursor = ref({
 provide("cursor", cursor);
 // 移入显示cursor
 const onMouseenter = () => {
-  if (fabricPanel.value.getIsDrawingMode() === false) return;
+  if (fabricPanel.value?.getIsDrawingMode() === false) return;
   cursor.value.visible = true;
 };
 // 移出隐藏cursor
@@ -167,22 +169,25 @@ const handleOptSteps = (type, can) => {
       @change-background="onChangeBackground"
     />
     <div class="flex flex-col flex-1">
-      <Header :can-prev="canPrev" :can-next="canNext" @change-history-step="handleOptSteps" />
+      <Header
+        :can-prev="canPrev"
+        :can-next="canNext"
+        @change-history-step="handleOptSteps"
+        @change-from-image-u-r-l="handleChangeFromImageURL"
+      />
       <div class="wrapper">
         <div class="panel-container">
           <BasePanel
-            v-if="loading === false"
             ref="formImageBasePanel"
             class="panel"
             @on-drag="onDragFromImageBasePanel"
             @on-wheel="onWheelFormImageBasePanel"
           >
-            <ImagePanel :from-image-u-r-l="fromImageURL"></ImagePanel>
+            <ImagePanel v-if="basePanelReady" :from-image-u-r-l="fromImageURL"></ImagePanel>
           </BasePanel>
         </div>
         <div class="panel-container left-border">
           <BasePanel
-            v-if="loading === false"
             ref="fabricBasePanel"
             class="panel fabric-panel"
             @mousemove="onMousemove"
@@ -191,7 +196,15 @@ const handleOptSteps = (type, can) => {
             @on-drag="onDragFabricBasePanel"
             @on-wheel="onWheelFabricBasePanel"
           >
-            <FabricPanel ref="fabricPanel" @initialized="onFabricCanvasInitialized"></FabricPanel>
+            <FabricPanel
+              v-if="finished && basePanelReady"
+              ref="fabricPanel"
+              :from-image="fromImageURL"
+              :remove-bg-image="resultImageURL"
+              :fabric-options="fabricBasePanel.getWidthHeight()"
+              @initialized="onFabricCanvasInitialized"
+            ></FabricPanel>
+            <div v-else-if="basePanelReady" class="loading-box">智能抠图中....</div>
           </BasePanel>
         </div>
       </div>
@@ -224,6 +237,12 @@ const handleOptSteps = (type, can) => {
     &.draggable :deep(canvas) {
       cursor: grab !important;
     }
+  }
+  .loading-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }
 .control-bar {

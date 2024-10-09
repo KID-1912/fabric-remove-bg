@@ -1,17 +1,24 @@
 <script setup>
+import { createObjectURL } from "blob-util";
+
 const props = defineProps({
   canNext: { type: Boolean, required: true },
   canPrev: { type: Boolean, required: true },
 });
-const emit = defineEmits(["changeHistoryStep"]);
+const emit = defineEmits(["changeHistoryStep", "changeFromImageURL"]);
 
 const onChangeHistoryStep = (type, can) => {
   emit("changeHistoryStep", type, can);
 };
+const onChangeFromImage = async (event) => {
+  const file = event.target.files[0];
+  const imageURL = createObjectURL(file);
+  emit("changeFromImageURL", imageURL);
+};
 </script>
 
 <template>
-  <div class="flex p-10px">
+  <div class="flex justify-between items-center p-10px">
     <div class="opt-steps-box flex">
       <div
         class="btn flex items-center"
@@ -36,6 +43,9 @@ const onChangeHistoryStep = (type, can) => {
       >
         <div>重做</div>
       </div>
+    </div>
+    <div>
+      <input type="file" @change="onChangeFromImage" />
     </div>
   </div>
 </template>

@@ -3,15 +3,20 @@ import { fabric } from "fabric";
 import { useFabric } from "../../composables/useFabric.js";
 import Cursor from "../Cursor.vue";
 import { createHistory } from "fabricjs-history";
+import { onMounted } from "vue";
 
+const props = defineProps({
+  fromImage: { type: String, required: true },
+  removeBgImage: { type: String, required: true },
+  fabricOptions: { type: Object, required: true },
+});
 const emit = defineEmits(["initialized"]);
 
 // 初始化画布
 const fabricCanvasRef = ref(null);
 let fabricInstance;
-// todo:图片改变的时候，重新初始化替换
-const initFabric = async (options) => {
-  const { fromImage, removeBgImage, ...fabricOptions } = options;
+const initFabric = async () => {
+  const { fromImage, removeBgImage, fabricOptions } = props;
   // 创建fabric实例
   const defaultOptions = {
     selection: false,
@@ -51,6 +56,10 @@ const initFabric = async (options) => {
     { crossOrigin: "Anonymous" },
   );
 };
+onMounted(initFabric);
+onUnmounted(() => {
+  fabricInstance?.dispose();
+});
 
 // 画布绘制模式
 const getIsDrawingMode = () => fabricInstance.isDrawingMode;
