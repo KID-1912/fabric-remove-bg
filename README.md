@@ -15,8 +15,6 @@ useFabric 创建Fabric的画布,支持画笔，历史记录等
 
 @use-gesture 实现拖拽
 
-vue-drag-resize 实现自定义/按比例裁剪
-
 **具体实现**
 
 - 搭建index页面，左右两个面板布局，容器relative
@@ -37,9 +35,11 @@ vue-drag-resize 实现自定义/按比例裁剪
   - 设置背景, setBackgroundColor setBackgroundImage
   - 历史记录, fabricjs-history createHistory
 
-- 接口对接，loading实现，自定义上传图片
+- 接口对接√，loading实现√，自定义上传图片√
 
 - 裁剪思路说明
+  vue-drag-resize 实现自定义/按比例裁剪
+  接口api说明
 
 ### clipdrop API
 

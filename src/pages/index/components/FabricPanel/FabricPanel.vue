@@ -3,10 +3,11 @@ import { fabric } from "fabric";
 import { useFabric } from "../../composables/useFabric.js";
 import Cursor from "../Cursor.vue";
 import { createHistory } from "fabricjs-history";
-import { onMounted } from "vue";
+import { saveAs } from "file-saver";
 
 const props = defineProps({
   fromImage: { type: String, required: true },
+  fromImageSize: { type: Object, required: true },
   removeBgImage: { type: String, required: true },
   fabricOptions: { type: Object, required: true },
 });
@@ -117,6 +118,25 @@ const setBackgroundImage = (url) => {
   );
 };
 
+// 导出画布为图片
+const saveAsImage = () => {
+  const currentZoom = fabricInstance.getZoom();
+  const currentWidth = fabricInstance.width;
+  const currentHeight = fabricInstance.height;
+  fabricInstance.setDimensions({
+    width: props.fromImageSize.width,
+    height: props.fromImageSize.height,
+  });
+  fabricInstance.setZoom(1);
+  const dataURL = fabricInstance.toDataURL();
+  saveAs(dataURL, "image.png");
+  fabricInstance.setDimensions({
+    width: currentWidth,
+    height: currentHeight,
+  });
+  fabricInstance.setZoom(currentZoom);
+};
+
 defineExpose({
   initFabric,
   getIsDrawingMode,
@@ -126,6 +146,7 @@ defineExpose({
   setWidthHeight,
   setBackgroundColor,
   setBackgroundImage,
+  saveAsImage,
 });
 </script>
 

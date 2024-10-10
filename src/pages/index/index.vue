@@ -42,9 +42,6 @@ const handleChangeFromImageURL = (imageURL) => {
   fetchRemoveBg(imageURL);
   initBasePanel();
 };
-// watch(fromImageURL, async () => {
-//   if (!fromImageURL.value) return;
-// });
 
 // 左侧图片
 const formImageBasePanel = ref(null); // fromImage图片面板
@@ -67,7 +64,8 @@ const cursor = ref({
 provide("cursor", cursor);
 // 移入显示cursor
 const onMouseenter = () => {
-  if (fabricPanel.value?.getIsDrawingMode() === false) return;
+  if (basePanelReady.value === false) return;
+  if (fabricPanel.value.getIsDrawingMode() === false) return;
   cursor.value.visible = true;
 };
 // 移出隐藏cursor
@@ -120,6 +118,7 @@ const onDragFabricBasePanel = ({ x, y }) => {
 // 画板滚轮缩放与联动
 const scaleRatio = ref(1);
 const onWheelFormImageBasePanel = (dy) => {
+  if (basePanelReady.value === false) return;
   const { width, height } = formImageBasePanel.value.getWidthHeight();
   scaleRatio.value = Math.floor((width / fromImageSize.value.width) * 100) / 100;
   fabricPanel.value.setWidthHeight({ width, height });
@@ -127,6 +126,7 @@ const onWheelFormImageBasePanel = (dy) => {
   fabricBasePanel.value.triggerWheel(dy);
 };
 const onWheelFabricBasePanel = (dy) => {
+  if (basePanelReady.value === false) return;
   const { width, height } = fabricBasePanel.value.getWidthHeight();
   scaleRatio.value = Math.floor((width / fromImageSize.value.width) * 100) / 100;
   fabricPanel.value.setWidthHeight({ width, height });
@@ -158,6 +158,12 @@ const handleOptSteps = (type, can) => {
     fabricContext.reset();
   }
 };
+
+// 导出抠图
+const handleExportRemoveBgImage = () => {
+  if (finished.value === false) return;
+  fabricPanel.value.saveAsImage();
+};
 </script>
 
 <template>
@@ -174,6 +180,7 @@ const handleOptSteps = (type, can) => {
         :can-next="canNext"
         @change-history-step="handleOptSteps"
         @change-from-image-u-r-l="handleChangeFromImageURL"
+        @export-remove-bg-image="handleExportRemoveBgImage"
       />
       <div class="wrapper">
         <div class="panel-container">
@@ -201,6 +208,7 @@ const handleOptSteps = (type, can) => {
               ref="fabricPanel"
               :from-image="fromImageURL"
               :remove-bg-image="resultImageURL"
+              :from-image-size="fromImageSize"
               :fabric-options="fabricBasePanel.getWidthHeight()"
               @initialized="onFabricCanvasInitialized"
             ></FabricPanel>

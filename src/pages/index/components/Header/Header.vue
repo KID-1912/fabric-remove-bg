@@ -5,7 +5,7 @@ const props = defineProps({
   canNext: { type: Boolean, required: true },
   canPrev: { type: Boolean, required: true },
 });
-const emit = defineEmits(["changeHistoryStep", "changeFromImageURL"]);
+const emit = defineEmits(["changeHistoryStep", "changeFromImageURL", "exportRemoveBgImage"]);
 
 const onChangeHistoryStep = (type, can) => {
   emit("changeHistoryStep", type, can);
@@ -14,6 +14,9 @@ const onChangeFromImage = async (event) => {
   const file = event.target.files[0];
   const imageURL = createObjectURL(file);
   emit("changeFromImageURL", imageURL);
+};
+const onExportRemoveBgImage = () => {
+  emit("exportRemoveBgImage");
 };
 </script>
 
@@ -45,7 +48,8 @@ const onChangeFromImage = async (event) => {
       </div>
     </div>
     <div>
-      <input type="file" @change="onChangeFromImage" />
+      <input type="file" accept=".png, .jpg, .jpeg" class="w-200px" @change="onChangeFromImage" />
+      <button type="button" class="btn-download" @click="onExportRemoveBgImage">导出图片</button>
     </div>
   </div>
 </template>
@@ -64,5 +68,12 @@ const onChangeFromImage = async (event) => {
       color: #ccc;
     }
   }
+}
+.btn-download {
+  padding: 4px 12px;
+  color: #635ff2;
+  border-radius: 4px;
+  background-color: #f0effe;
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 </style>
