@@ -1,5 +1,5 @@
 {
-  "name": "vite-pure-template",
+  "name": "fabric-remove-bg",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -45,5 +45,8 @@
     "fabric-eraser-brush": "^1.0.1",
     "fabricjs-history": "^1.0.0",
     "file-saver": "^2.0.5"
+  },
+  "overrides": {
+    "eslint": "8.57.0"
   }
 }

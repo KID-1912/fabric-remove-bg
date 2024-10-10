@@ -25,6 +25,7 @@ export default defineConfig(({ command, mode }) => {
       preprocessorOptions: {
         less: {},
         scss: {
+          api: "modern-compiler",
           additionalData: "",
         },
       },
