@@ -1,63 +1,81 @@
 # fabric-remove-bg
 
-**需求提出**
+<h3 align="center">
+  基于 Fabric.js 的图片编辑工具，结合remove.bg API 能够实现图片背景的快速去除。
+</h3>
 
-BasePanel 可拖动位置，触摸有粉笔cursor，且支持调整粉笔半径，可缩放的hook能力
+[在线示例demo](https://kid-1912.github.io/fabric-remove-bg)
 
-FabricPanel Fabric的canvas画布
-useFabric 创建Fabric的画布,支持画笔，历史记录等
+<br/>
 
-一个画板，支持左右对画布涂抹，画笔修改
+[![](https://raw.githubusercontent.com/KID-1912/Github-PicGo-Images/master/2024/10/10/20241010120320.png)](https://kid-1912.github.io/fabric-remove-bg)
 
-抠图接口，自动抠图
+<br/>
 
-这些不讲但实现掉 历史记录 设置颜色与背景
+---
 
-@use-gesture 实现拖拽
+## Features
 
-**具体实现**
+- 去除背景：remove.bg API 去除图片背景
 
-- 搭建index页面，左右两个面板布局，容器relative
+- 修改背景：设置图片背景图、背景色
 
-- BasePanel 实现基础面板能力
+- 画笔绘图：擦除/修补图片内容
 
-  - 拖拽√，编写useDraggable.js，使用use-gesture实现
-  - 缩放√，编写useWheel.js滚动时调整面板大小位置，使用use-gesture实现，同步调整画布大小
+- 历史记录：撤销/重做
 
-- FabricPanel 实现画布面板的能力
+- 查看图片：拖拽、缩放
 
-  - 独立FabricPanel组件，包含初始化 fabric 画布，并绘制底图(initFabricCanvas),自适应宽高和居中位置实现
-  - 编写useFabric.js增强fabric能力，可绘画画笔(fabric-eraser-brush + isDrawingMode)
-  - 笔触（cursor）支持,Cursor.vue + provide/inject
-  - 画笔实现：擦除,画笔大小:实现FabricPanel的setIsDrawingMode
-    setDrawingBrush，修补实现：添加一个默认被擦除的底图至于抠图下层
-  - 拖拽和绘制模式切换,画布位置联动
-  - 设置背景, setBackgroundColor setBackgroundImage
-  - 历史记录, fabricjs-history createHistory
+- 本地上传/下载图片
 
-- 接口对接√，loading实现√，自定义上传图片√
+- 裁剪图片(todo)
 
-- 裁剪思路说明
-  vue-drag-resize 实现自定义/按比例裁剪
-  接口api说明
+## Remove.bg API
 
-### clipdrop API
+Configure your API key in `.env` file
 
-https://clipdrop.co/apis/docs/remove-background
+```bash
+VITE_REMOVE_BG_API_KEY=your_remove.bg_api_key
+VITE_REMOVE_BG_API_KEY2=your_clipdrop_api_key
+```
 
-Your user ID is 3ne3zDTGfYS4OUWNT6QZBWdIZWT2
+you can get your API key from [remove.bg](https://www.remove.bg/api#remove-background)
+you can get your API key2 from [clipdrop API](https://clipdrop.co/apis/)
 
-Your email is heyutongxue@gmail.com
+**Note**：
 
-api key 9b53c57298957089000f5996d17ef2e5162608a32fe3a5bda03a99fef442e9895043303f160381bda29d836d37adf8bf
+`VITE_APP_REMOVE_BG_KEY` is the key for _remove.bg API_;
 
-### remove-api
+`VITE_APP_REMOVE_BG_KEY2` is the key for _clipdrop API_;
 
-Bmg4H1JDpvJRxCFh1x4fBt5E
+**Usage**：
 
-https://www.remove.bg/g/developers
+Check the [`src/pages/index/composables/useRemoveBg.js`](https://github.com/KID-1912/fabric-remove-bg/blob/master/src/pages/index/composables/useRemoveBg.js) call api methods：
 
-image_file
-size: "auto"
+```js
+const blob = await http.fetchRemoveBg(params); // 使用 remove.bg API
+// const blob = await http.fetchRemoveBg2(params); // 使用 clipdrop API
+```
 
-x-api-key Bmg4H1JDpvJRxCFh1x4fBt5E
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+**Relations**
+
+[fabric.js](https://github.com/fabricjs/fabric.js)
+
+[remove.bg API](https://www.remove.bg/zh/api)
+
+[fabric-eraser-brush](https://www.npmjs.com/package/fabric-eraser-brush)
+
+[fabricjs-history](https://www.npmjs.com/package/fabricjs-history)
