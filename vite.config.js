@@ -1,7 +1,6 @@
 import path from "node:path";
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
-import svgLoader from "vite-svg-loader";
 import WindiCSS from "vite-plugin-windicss";
 import eslint from "vite-plugin-eslint";
 import legacy from "vite-plugin-legacy-swc";
@@ -50,7 +49,6 @@ export default defineConfig(({ command, mode }) => {
         ],
       }),
       Icons({ autoInstall: true }),
-      svgLoader(),
       WindiCSS(),
       eslint(),
       legacy(),
