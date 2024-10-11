@@ -23,7 +23,7 @@ export const useRemoveBg = (defaultImageURL = exampleFormImage) => {
       // 示例图
       if (imageURL === exampleFormImage) {
         resultImageURL.value = await new Promise((resolve) => {
-          setTimeout(() => resolve(exampleResultImage), 3000);
+          setTimeout(() => resolve(exampleResultImage), 2000);
         });
       }
       // 其它图片
