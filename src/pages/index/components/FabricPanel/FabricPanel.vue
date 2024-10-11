@@ -16,6 +16,7 @@ const emit = defineEmits(["initialized"]);
 // 初始化画布
 const fabricCanvasRef = ref(null);
 let fabricInstance;
+const isAvailable = ref(false);
 const initFabric = async () => {
   const { fromImage, removeBgImage, fabricOptions } = props;
   // 创建fabric实例
@@ -52,6 +53,7 @@ const initFabric = async () => {
       img.set("selectable", false);
       fabricInstance.add(img);
       createHistory({ canvas: fabricInstance, historyEvent: ["erasing:end"] });
+      isAvailable.value = true;
       emit("initialized", fabricInstance);
     },
     { crossOrigin: "Anonymous" },
@@ -138,6 +140,7 @@ const saveAsImage = () => {
 };
 
 defineExpose({
+  isAvailable,
   initFabric,
   getIsDrawingMode,
   setIsDrawingMode,

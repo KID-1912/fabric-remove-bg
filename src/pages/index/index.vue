@@ -52,6 +52,8 @@ const fabricPanel = ref(null); // fabric画布面板
 let fabricContext; // fabric画布
 const onFabricCanvasInitialized = (context) => {
   fabricContext = context;
+  fabricBasePanel.value.setWheelEnable(true);
+  formImageBasePanel.value.setWheelEnable(true);
   fabricContext.on("history:change", onHistoryChange.bind(context));
 };
 
@@ -64,8 +66,7 @@ const cursor = ref({
 provide("cursor", cursor);
 // 移入显示cursor
 const onMouseenter = () => {
-  if (!fabricPanel.value) return;
-  console.log(fabricPanel.value.getIsDrawingMode());
+  if (!fabricPanel.value?.isAvailable) return;
   if (fabricPanel.value.getIsDrawingMode() === false) return;
   cursor.value.visible = true;
 };
@@ -83,7 +84,7 @@ const onMousemove = (event) => {
 // 切换擦除/修补画笔
 const pencil = ref({ mode: "none", radius: 10 });
 const onChangePencilMode = (mode) => {
-  if (basePanelReady.value === false) return;
+  if (!fabricPanel.value?.isAvailable) return;
   pencil.value.mode = mode;
   fabricPanel.value.setIsDrawingMode(true);
   fabricPanel.value.setDrawingBrush({
@@ -121,7 +122,6 @@ const onDragFabricBasePanel = ({ x, y }) => {
 // 画板滚轮缩放与联动
 const scaleRatio = ref(1);
 const onWheelFormImageBasePanel = (dy) => {
-  if (!fabricPanel.value) return;
   const { width, height } = formImageBasePanel.value.getWidthHeight();
   scaleRatio.value = Math.floor((width / fromImageSize.value.width) * 100) / 100;
   fabricPanel.value.setWidthHeight({ width, height });
@@ -129,7 +129,6 @@ const onWheelFormImageBasePanel = (dy) => {
   fabricBasePanel.value.triggerWheel(dy);
 };
 const onWheelFabricBasePanel = (dy) => {
-  if (!fabricPanel.value) return;
   const { width, height } = fabricBasePanel.value.getWidthHeight();
   scaleRatio.value = Math.floor((width / fromImageSize.value.width) * 100) / 100;
   fabricPanel.value.setWidthHeight({ width, height });
@@ -139,7 +138,7 @@ const onWheelFabricBasePanel = (dy) => {
 
 // 设置背景
 const onChangeBackground = ({ type, color, url }) => {
-  if (!fabricPanel.value) return;
+  if (!fabricPanel.value?.isAvailable) return;
   if (type === "color") fabricPanel.value.setBackgroundColor(color);
   if (type === "image") fabricPanel.value.setBackgroundImage(url);
 };

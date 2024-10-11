@@ -36,10 +36,11 @@ const onWheel = (dy, isTrusted = true) => {
   isTrusted && emit("onWheel", dy);
 };
 const triggerWheel = (dy) => onWheel(dy, false);
-useWheel(basePanelRef, { onWheel });
+const { setWheelEnable } = useWheel(basePanelRef, { enabled: false, onWheel });
 
 defineExpose({
   setDraggable,
+  setWheelEnable,
   setXY: setPosition,
   getWidthHeight,
   setWidthHeight,
