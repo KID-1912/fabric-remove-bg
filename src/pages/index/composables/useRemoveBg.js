@@ -29,9 +29,11 @@ export const useRemoveBg = (defaultImageURL = exampleFormImage) => {
       // 其它图片
       else {
         const file = await imgSrcToBlob(imageURL);
-        const params = { image_file: file };
+        // const params = { image_file: file };
         // const blob = await http.fetchRemoveBg(params); // 使用 remove.bg API
-        const blob = await http.fetchRemoveBg2(params); // 使用 clipdrop API
+        // const blob = await http.fetchRemoveBg2(params); // 使用 clipdrop API
+        const params = { file };
+        const blob = await http.fetchKoutu(params); // 使用 Koutu API
         resultImageURL.value = await blobToDataURL(blob);
       }
     } catch (error) {

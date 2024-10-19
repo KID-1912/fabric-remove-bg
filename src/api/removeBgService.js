@@ -21,3 +21,12 @@ export function fetchRemoveBg2(data) {
     },
   });
 }
+
+export function fetchKoutu(data) {
+  return request.post("https://design.palxp.cn:5175/api/ai/v1/koutu", data, {
+    responseType: "blob",
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
